@@ -32,6 +32,18 @@ class Facebook_Core extends Facebook {
 		));
 	}	
 
+
+	/**
+	 * Returns Facebook config variable. This is a generic function so it would work such as config_<config_name>.
+	 * Call to get a config variable is only possible from a non-static context as config is set only during __construct call.
+	 *
+	 * @var name string name of the config 
+	 * @return mixed returns the config value from the config array
+	 **/	
+	static function config($name) {
+		return self::$config[$name];
+	}
+
 	
 	/**
 	 * Basic me call 
@@ -41,6 +53,17 @@ class Facebook_Core extends Facebook {
 	}
 	
 
+	/**
+	 * Gets user's friends limited by limit and offset
+	 *
+	 * @var limit int number of friends to get
+	 * @var limit int offset on the limit
+	 **/
+	function friends($limit=null, $offset=null) {
+		return $this->api('/me/friends/?1' . (($limit) ? "&limit=" . $limit : '') . (($offset) ? "&offset=" . $offset : ''));
+	}
+
+	
 	/**
 	 * Make batch API call to Facebook graph API end point
 	 *
@@ -79,22 +102,25 @@ class Facebook_Core extends Facebook {
 	###########
 	
 	/**
-	 * Override non-static function references.
+	 * Override non-static function references. If 
 	 *
 	 * @var name string function name with underscore. this parameter is case sensitive
-	 * @var $arguments mixed array of arguments
+	 * @var arguments mixed array of arguments
 	 **/	
 	public function __call($name, $arguments) {
-		
 		$return = null;
-		$new_name = $this->get_new_function_name($name);
 		
-		if(method_exists($this, $new_name)){
-			$return = call_user_func(array($this, $new_name), $arguments);
+		if(preg_match('/^config_/', $name)>0){
+			$return = $this->config(str_replace("config_", "", $name));			
 		} else {
-			trigger_error("Fatal error: no function by name " . $new_name . " or " . $name, E_USER_ERROR);
+			$new_name = $this->get_new_function_name($name);
+			
+			if(method_exists($this, $new_name)){
+				$return = call_user_func(array($this, $new_name), $arguments);
+			} else {
+				trigger_error("Fatal error: no function by name " . $new_name . " or " . $name, E_USER_ERROR);
+			}
 		}
-		
 		return $return;
 	}
 
@@ -102,12 +128,12 @@ class Facebook_Core extends Facebook {
 	 * Override static function references.
 	 *
 	 * @var name string function name with underscore. this parameter is case sensitive
-	 * @var $arguments mixed array of arguments
+	 * @var arguments mixed array of arguments
 	 **/	
 	public static function __callStatic($name, $arguments) {
-		
 		$return = null;
-		$new_name = sefl::$get_new_function_name($name);
+		
+		$new_name = self::$get_new_function_name($name);
 		
 		if(method_exists($this, $new_name)){
 			$return = call_user_func(array(self, $new_name), $arguments);
