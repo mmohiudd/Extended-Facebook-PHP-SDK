@@ -70,7 +70,11 @@ class Facebook_Core extends Facebook {
 	 * @var fb_user_id int Facebook user ID. 
 	 * @return mixed profile album information from Facebook
 	 **/
-	function get_profile_album($fb_user_id) {
+	function get_profile_album($fb_user_id=null) {
+		if($fb_user_id===null){
+			$fb_user_id = $this->get_user(); // if no user ID passed, set it to current user
+		}
+		
 		$q = 'SELECT aid, object_id, owner, visible, owner, can_upload FROM album WHERE type="profile" AND owner="' . $fb_user_id . '"';
 		
 		$response = $this->api("fql?q=" . urlencode($q));
@@ -89,7 +93,11 @@ class Facebook_Core extends Facebook {
 	 * @var fb_user_id int Facebook user ID. 
 	 * @return mixed profile album information from Facebook
 	 **/
-	function get_albums($fb_user_id) {
+	function get_albums($fb_user_id=null) {
+		if($fb_user_id===null){
+			$fb_user_id = $this->get_user(); // if no user ID passed, set it to current user
+		}
+		
 		$return = array();
 		$album_photos = array();
 		
