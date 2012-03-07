@@ -63,6 +63,25 @@ class Facebook_Core extends Facebook {
 		return $this->api('/me/friends/?1' . (($limit) ? "&limit=" . $limit : '') . (($offset) ? "&offset=" . $offset : ''));
 	}
 
+
+	/**
+	 * Gets user's profile album
+	 *
+	 * @var fb_user_id int Facebook user ID. 
+	 * @return mixed profile album information from Facebook
+	 **/
+	function get_profile_album($fb_user_id) {
+		$q = 'SELECT aid, object_id, owner, visible, owner, can_upload FROM album WHERE type="profile" AND owner="' . $fb_user_id . '"';
+		
+		$response = $this->api("fql?q=" . urlencode($q));
+		
+		if(!empty($response['data'][0])) {
+			return $response['data'][0];	
+		}
+		
+		return null;
+	}
+	
 	
 	/**
 	 * Make batch API call to Facebook graph API end point
