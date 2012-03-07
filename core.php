@@ -195,7 +195,7 @@ class Facebook_Core extends Facebook {
 			$new_name = $this->get_new_function_name($name);
 			
 			if(method_exists($this, $new_name)){
-				$return = call_user_func(array($this, $new_name), $arguments);
+				$return = call_user_func_array(array($this, $new_name), $arguments); 
 			} else {
 				trigger_error("Fatal error: no function by name " . $new_name . " or " . $name, E_USER_ERROR);
 			}
@@ -215,7 +215,7 @@ class Facebook_Core extends Facebook {
 		$new_name = self::$get_new_function_name($name);
 		
 		if(method_exists($this, $new_name)){
-			$return = call_user_func(array(self, $new_name), $arguments);
+			$return = call_user_func_array(array(self, $new_name), $arguments);
 		} else {
 			trigger_error("Fatal error: no function by name " . $new_name . " or " . $name, E_USER_ERROR);
 		}
