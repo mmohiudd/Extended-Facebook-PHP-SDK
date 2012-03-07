@@ -84,6 +84,58 @@ class Facebook_Core extends Facebook {
 	
 	
 	/**
+	 * Gets user's album(s)
+	 *
+	 * @var fb_user_id int Facebook user ID. 
+	 * @return mixed profile album information from Facebook
+	 **/
+	function get_albums($fb_user_id) {
+		$return = array();
+		$album_photos = array();
+		
+		$queries = array(
+			'albums'	=> "SELECT aid, object_id, type, visible, owner, cover_pid, cover_object_id, visible, photo_count, video_count FROM album WHERE owner='" . $fb_user_id . "'",
+			'album_covers'	=> "SELECT src_big, src_small, images, aid FROM photo WHERE pid IN (SELECT cover_pid FROM #albums)",
+			'photos' => "SELECT src_big, src_small, images, aid FROM photo WHERE aid IN (SELECT aid FROM #albums)",
+		);
+
+		$results = $this->api(array(
+					'method' => 'fql_multiquery',
+					'queries' => $queries
+				));
+		
+		
+		$albums = $results[0]['fql_result_set'];
+		$album_covers = $results[1]['fql_result_set'];
+		$photos = $results[2]['fql_result_set'];
+		
+		if(is_array($photos)){
+			foreach($photos as $photo){
+				$album_photos[$photo['aid']][] = $photo;
+			}
+		}
+		
+		
+		
+		foreach($albums as $i=>$data){
+			$entry = $data;
+			
+			if(!empty($album_covers[$i])) {
+				$entry['cover'] = $album_covers[$i];
+			}
+			
+			if(!empty($album_photos[$data['aid']])) {
+				$entry['photos'] = $album_photos[$data['aid']];
+			}
+			
+			$return[] = $entry;
+		}
+		
+		return $return;
+	}
+	
+	
+	/**
 	 * Make batch API call to Facebook graph API end point
 	 *
 	 * @var batch_data mixed array of variables consisting method and relative_url
