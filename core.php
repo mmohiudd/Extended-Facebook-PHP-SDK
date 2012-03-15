@@ -102,7 +102,7 @@ class Facebook_Core extends Facebook {
 		$album_photos = array();
 		
 		$queries = array(
-			'albums'	=> "SELECT aid, object_id, type, visible, owner, cover_pid, cover_object_id, visible, photo_count, video_count FROM album WHERE owner='" . $fb_user_id . "'",
+			'albums'	=> "SELECT aid, object_id, type, name, visible, owner, cover_pid, cover_object_id, visible, photo_count, video_count FROM album WHERE owner='" . $fb_user_id . "'",
 			'album_covers'	=> "SELECT src_big, src_small, images, aid FROM photo WHERE pid IN (SELECT cover_pid FROM #albums)",
 			'photos' => "SELECT pid, object_id, owner, src_big, src_small, images, aid FROM photo WHERE aid IN (SELECT aid FROM #albums)",
 		);
