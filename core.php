@@ -104,7 +104,7 @@ class Facebook_Core extends Facebook {
 		$queries = array(
 			'albums'	=> "SELECT aid, object_id, type, visible, owner, cover_pid, cover_object_id, visible, photo_count, video_count FROM album WHERE owner='" . $fb_user_id . "'",
 			'album_covers'	=> "SELECT src_big, src_small, images, aid FROM photo WHERE pid IN (SELECT cover_pid FROM #albums)",
-			'photos' => "SELECT src_big, src_small, images, aid FROM photo WHERE aid IN (SELECT aid FROM #albums)",
+			'photos' => "SELECT pid, object_id, owner, src_big, src_small, images, aid FROM photo WHERE aid IN (SELECT aid FROM #albums)",
 		);
 
 		$results = $this->api(array(
@@ -124,19 +124,22 @@ class Facebook_Core extends Facebook {
 		}
 		
 		
-		
 		foreach($albums as $i=>$data){
-			$entry = $data;
-			
-			if(!empty($album_covers[$i])) {
-				$entry['cover'] = $album_covers[$i];
+			if($data['photo_count']>0) { // send albums with at least 1 photo
+				$entry = $data;
+				
+				if(!empty($album_covers[$i])) {
+					$entry['cover'] = $album_covers[$i];
+				}
+				
+				if(!empty($album_photos[$data['aid']])) {
+					$entry['photos'] = $album_photos[$data['aid']];
+				}
+				
+				if(!empty($entry['cover'])) { // add albums with cover
+					$return[] = $entry;
+				}
 			}
-			
-			if(!empty($album_photos[$data['aid']])) {
-				$entry['photos'] = $album_photos[$data['aid']];
-			}
-			
-			$return[] = $entry;
 		}
 		
 		return $return;
